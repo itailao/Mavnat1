@@ -83,8 +83,14 @@ class AVLTree(object):
 			kid.parent = father.parent
 		father.parent = kid	
 		return kid
+	#starts from kid of suspicious arch,verify insert 
+	def newBalance(self,node):
+		isCool = False
+		while isCool != True:
+			if node.parent.height - node.height
 
-		
+					
+	
 			
 	"""searches for a node in the dictionary corresponding to the key (starting at the root)
         
