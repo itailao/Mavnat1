@@ -27,7 +27,6 @@ class AVLNode(object):
 		
 
 	"""returns whether self is not a virtual node 
-
 	@rtype: bool
 	@returns: False if self is a virtual node, True otherwise.
 	"""
@@ -36,6 +35,14 @@ class AVLNode(object):
 			return False
 		return True
 
+	def connect(self, kid, isRight): "connects between self/parent and kid, kid is right son if isRight==True
+                kid.parent = self
+                if isRight:
+                        self.right = kid
+                else:
+                        self.left = kid
+                        
+                        
 """
 A class implementing an AVL tree.
 """
@@ -83,11 +90,45 @@ class AVLTree(object):
 			kid.parent = father.parent
 		father.parent = kid	
 		return kid
-	#starts from kid of suspicious arch,verify insert 
+
+	#starts from kid of suspicious arch,verify insert, returns promCount
 	def newBalance(self,node):
-		isCool = False
-		while isCool != True:
-			if node.parent.height - node.height
+		if node.parent.height-node.height == 1:
+			return 0
+		isCorrect = False
+		promCount = 0
+		father = node.parent
+		while isCorrect == False:
+			father.height += 1 
+			PromCount += 1 
+			if(father.parent.height - father.height == 1):
+				isCorrect = True
+			else:
+				father = father.parent
+				if (father.height - father.left.height + father.height - father.right.height == 1):
+					father.height += 1
+					PromCount += 1
+					father = father.parent
+				else:
+					isRightSon = True
+					if father.key < father.parent.key:
+						isRightSon = False
+					if (isRightSon == False and father.right.height + 2 == father.height) or (isRightSon == True and father.left.height + 2 == father.height):
+						AVLTree.rotation(father,not isRightSon)
+						isCorrect = True
+					else:
+						if father.right.height + 1 == father.height:
+							tmp = father.right
+							AVLTree.roation(tmp,False)
+						else:
+							tmp = father.left
+							AVLTree.rotation(tmp,True)
+					if father.parent.key < father.parent.parent.key:
+						AVLTree.rotation(father.parent,True)
+					else:
+						AVLTree.rotation(father.parent,False)
+					isCorrect = True
+		return PromCount
 
 					
 	
@@ -138,8 +179,7 @@ class AVLTree(object):
 	e is the number of edges on the path between the starting node and new node before rebalancing,
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
-	#לאתחל מקסימום
-	#לאתחל גודל
+	
 	def help_insert(self, node, virt):
 		node.height = 0
 		self.size += 1
@@ -151,43 +191,9 @@ class AVLTree(object):
 			father.right = node
 		else:
 			father.left = node
-		PromCount = 0
 		if self.max_node.key < node.key:
 			self.max_node = node 
-		if father.height == 1:
-			return node,0
-		isCorrect = False
-		while isCorrect == False:
-			father.height += 1 
-			PromCount += 1 
-			if(father.parent.height - father.height == 1):
-				isCorrect = True
-			else:
-				father = father.parent
-				if (father.height - father.left.height + father.height - father.right.height == 1):
-					father.height += 1
-					PromCount += 1
-					father = father.parent
-				else:
-					isRightSon = True
-					if father.key < father.parent.key:
-						isRightSon = False
-					if (isRightSon == False and father.right.height + 2 == father.height) or (isRightSon == True and father.left.height + 2 == father.height):
-						AVLTree.rotation(father,not isRightSon)
-						isCorrect = True
-					else:
-						if father.right.height + 1 == father.height:
-							tmp = father.right
-							AVLTree.roation(tmp,False)
-						else:
-							tmp = father.left
-							AVLTree.rotation(tmp,True)
-					if father.parent.key < father.parent.parent.key:
-						AVLTree.rotation(father.parent,True)
-					else:
-						AVLTree.rotation(father.parent,False)
-					isCorrect = True
-		return node,PromCount
+		return node, newBalance(node)
 
 	def insert(self,key,value):
 		node = node(key,value)
@@ -198,13 +204,6 @@ class AVLTree(object):
 		retNode = tup2[0]
 		Prom = tup2[1]
 		return retNode,e,Prom
-
-		
-
-		/עצרנו בשקופית 22 במצגת 4 בקייס מספר שתיים 
-					
-
-		return None, -1, -1
 
 
 	"""inserts a new node into the dictionary with corresponding key and value, starting at the max
@@ -246,7 +245,31 @@ class AVLTree(object):
 	or the opposite way
 	"""
 	def join(self, tree2, key, val):
-		return
+                glueNode = AVLNode(key, val)
+                self.size+=tree2.size+1
+		minTree = self
+		maxTree = tree2
+		if glueNode.key<maxTree.get_root().key:
+                        minTree = tree2
+                        maxTree = self
+                if maxTree.get_root().height < minTree.get_root().height:
+                        self = minTree
+                        c = minTree.get_root()
+                        while c.height > maxTree.get_root().height:
+                                c = c.right
+                        c.parent.connect(glueNode, True)
+                        glueNode.connect(c, False)
+                        glueNode.connect(maxTree.get_root(), True)
+                else:
+                        self = maxTree
+                        c = maxTree.get_root()
+                        while c.height > minTree.get_root().height:
+                                c = c.left
+                        c.parent.connect(glueNode, False)
+                        glueNode.connect(c, True)
+                        glueNode.connect(minTree.get_root(), False)
+                glueNode.heigth = c.height+1
+                newBalance(glueNode.height)
 
 
 	"""splits the dictionary at a given node
@@ -296,3 +319,4 @@ class AVLTree(object):
 	"""
 	def get_root(self):
 		return self.root
+
