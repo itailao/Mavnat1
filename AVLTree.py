@@ -35,7 +35,8 @@ class AVLNode(object):
 			return False
 		return True
 
-	def connect(self, kid): "connects between self/parent and kid accourding to key
+	#connects between self/parent and kid accourding to key
+	def connect(self, kid):
                 kid.parent = self
                 if self.key > kid.key:
                         self.right = kid
@@ -92,11 +93,11 @@ class AVLTree(object):
 
 	#starts from kid of suspicious arch,verify insert, returns promCount
 	def newBalance(self,node):
-		if node.parent.height-node.height == 1:
+		father = node.parent
+		if father.height-node.height == 1:
 			return 0
 		isCorrect = False
 		promCount = 0
-		father = node.parent
 		while isCorrect == False:
 			father.height += 1 
 			PromCount += 1 
@@ -179,29 +180,27 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 	
-	def help_insert(self, node, virt):
-		node.height = 0
-		self.size += 1
-		node.right = AVLNode(None,None)
-		node.left = AVLNode(None,None)
-		father = virt.parent
-		node.parent = father
-		if father.right == virt:
-			father.right = node
-		else:
-			father.left = node
-		if self.max_node.key < node.key:
-			self.max_node = node 
-		return node, newBalance(node)
+	@staticmethod
+	def help_insert(key, val, virt):
+		virt.height = 0
+		rightVirt = AVLNode(None,None)
+		leftVirt = AVLNode(None,None)
+		virt.right = rightVirt
+		virt.left = leftVirt
+		virt.key = key
+		virt.val = val
+		return virt
 
 	def insert(self,key,value):
 		node = node(key,value)
 		tup = self.help_search(self.root,node)
 		virt = tup[0]
 		e = tup[1]
-		tup2 = self.help_insert(node,virt)
-		retNode = tup2[0]
-		Prom = tup2[1]
+		retNode = self.help_insert(key, value ,virt)
+		self.size+=1
+		if value>max_node.value:
+			self.max_node = virt
+		Prom = newBalance(retNode)
 		return retNode,e,Prom
 
 
