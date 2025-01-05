@@ -69,26 +69,25 @@ class AVLTree(object):
 	def rotation(node,isright):
 		kid = node
 		father = node.parent
-		hasGrandpa = True
-		if father.parent == None:
-			hasGrandpa = False
+		grandpa = father.parent
 		if (isright):
 			tmp = kid.right
-			kid.right = father
-			father.left = tmp
-			tmp.parent = father
+			if grandpa != None:
+				rightK = False
+				if grandpa.right == father:
+					rightK = True
+				grandpa.connect(kid, rightK)
+			kid.connect(father, True)
+			father.connect(tmp, False)
 		else:
 			tmp = kid.left
-			kid.left = father
-			father.right = tmp
-			tmp.parent = father
-		if hasGrandpa and father.parent.left.key == father.key:
-			father.parent.left = kid
-			kid.parent = father.parent
-		if hasGrandpa and father.parent.right.key == father.key:
-			father.parent.right = kid
-			kid.parent = father.parent
-		father.parent = kid	
+			if grandpa != None:
+				rightK = False
+				if grandpa.right == father:
+					rightK = True
+				grandpa.connect(kid, rightK)
+			kid.connect(father, False)
+			father.connect(tmp, True)
 		return kid
 
 	#starts from kid of suspicious arch,verify insert, returns promCount
