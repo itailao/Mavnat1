@@ -42,7 +42,15 @@ class AVLNode(object):
                 else:
                         self.left = kid
                         
-                        
+	def brother(self):
+		parent = self.parent
+		if self.parent == None:
+			return None
+		if self.key < parent.key:
+			return parent.right
+		else:
+			return parent.left
+	
 """
 A class implementing an AVL tree.
 """
@@ -158,7 +166,7 @@ class AVLTree(object):
 		node = self.max_node
 		i = 1
 		while (node.key >= key and node.parent.key >= key):
-			if (node.key = key):
+			if(node.key = key):
 				return node,i
 			node = node.parent
 			i += 1
@@ -219,7 +227,16 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 	def finger_insert(self, key, val):
-		return None, -1, -1
+		insNode = node(key,val)
+		maxNode = self.max_node
+		tup = self.finger_search
+		parentNode = tup[0]
+		Bool = True
+		if parentNode.key > key:
+			Bool = False
+		parentNode.connect(insNode,Bool)
+		return tup[0],tup[1],self.newBalance(insNode)
+
 
 
 	"""deletes node from the dictionary
@@ -229,8 +246,52 @@ class AVLTree(object):
 	@pre: node is a real pointer to a node in self
 	"""
 
-	def delete(self, node):
-		return	
+	def delete (self,node):
+    kid = node
+    father = node.parent
+    if node.left is None or node.right is None:
+            new_child = node.left if node.left else node.right
+            if father:
+                if father.left == node:
+                    father.left = new_child
+                else:
+                    father.right = new_child
+            if new_child:
+                new_child.parent = father
+            return new_child
+
+        kid = node.right
+        while kid.left:
+            kid = kid.left
+
+        node.key = kid.key
+        if kid.parent.left == kid:
+            kid.parent.left = kid.right
+        else:
+            kid.parent.right = kid.right
+        if kid.right:
+            kid.right.parent = kid.parent
+
+        while father:
+            father.height = 1 + max(father.left.height if father.left else 0,
+                                    father.right.height if father.right else 0)
+            balance = (father.left.height if father.left else 0) - (father.right.height if father.right else 0)
+
+            if balance > 1:
+                if father.left and father.left.right and (father.left.right.height > father.left.left.height if father.left.left else 0):
+                    self.rotation(father.left, False)
+                self.rotation(father, True)
+
+            elif balance < -1:
+                if father.right and father.right.left and (father.right.left.height > father.right.right.height if father.right.right else 0):
+                    self.rotation(father.right, True)
+                self.rotation(father, False)
+
+            father = father.parent
+
+    	return None
+
+
 
 	
 	"""joins self with item and another AVLTree
@@ -291,8 +352,17 @@ class AVLTree(object):
 	@rtype: list
 	@returns: a sorted list according to key of touples (key, value) representing the data structure
 	"""
-	def avl_to_array(self):
-		return None
+	def avl_to_array(root):
+    array = []
+
+    	def in_order_traversal(node):
+        	if node is not None:
+            	in_order_traversal(node.left)
+            	array.append(node.key)
+            	in_order_traversal(node.right)
+
+     in_order_traversal(root)
+    return array
 
 
 	"""returns the node with the maximal key in the dictionary
