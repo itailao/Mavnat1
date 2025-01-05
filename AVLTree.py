@@ -35,9 +35,9 @@ class AVLNode(object):
 			return False
 		return True
 
-	def connect(self, kid, isRight): "connects between self/parent and kid, kid is right son if isRight==True
+	def connect(self, kid): "connects between self/parent and kid accourding to key
                 kid.parent = self
-                if isRight:
+                if self.key > kid.key:
                         self.right = kid
                 else:
                         self.left = kid
@@ -63,6 +63,7 @@ class AVLTree(object):
 		self.root = None
 		self.max_node = None
 		self.size = 0 
+	
 	@staticmethod
 	def help_search(node,key):
 		i = 1
@@ -73,6 +74,7 @@ class AVLTree(object):
 				node = node.right
 			i += 1
 		return node,i
+	
 	@staticmethod
 	def rotation(node,isright):
 		kid = node
@@ -82,6 +84,7 @@ class AVLTree(object):
 			hasGrandpa = False
 		if (isright):
 			tmp = kid.right
+<<<<<<< HEAD
 			kid.right = father
 			father.left = tmp
 			tmp.parent = father
@@ -97,6 +100,22 @@ class AVLTree(object):
 			father.parent.right = kid
 			kid.parent = father.parent
 		father.parent = kid	
+=======
+			if grandpa != None:
+				rightK = False
+				grandpa.connect(kid)
+			kid.connect(father)
+			father.connect(tmp)
+		else:
+			tmp = kid.left
+			if grandpa != None:
+				rightK = False
+				if grandpa.right == father:
+					rightK = True
+				grandpa.connect(kid)
+			kid.connect(father)
+			father.connect(tmp)
+>>>>>>> 480952d (changed connect to single arr function and fixed join and rotation)
 		return kid
 
 	#starts from kid of suspicious arch,verify insert, returns promCount
@@ -318,17 +337,17 @@ class AVLTree(object):
                         c = minTree.get_root()
                         while c.height > maxTree.get_root().height:
                                 c = c.right
-                        c.parent.connect(glueNode, True)
-                        glueNode.connect(c, False)
-                        glueNode.connect(maxTree.get_root(), True)
+                        c.parent.connect(glueNode)
+                        glueNode.connect(c)
+                        glueNode.connect(maxTree.get_root())
                 else:
                         self = maxTree
                         c = maxTree.get_root()
                         while c.height > minTree.get_root().height:
                                 c = c.left
-                        c.parent.connect(glueNode, False)
-                        glueNode.connect(c, True)
-                        glueNode.connect(minTree.get_root(), False)
+                        c.parent.connect(glueNode)
+                        glueNode.connect(c)
+                        glueNode.connect(minTree.get_root())
                 glueNode.heigth = c.height+1
                 newBalance(glueNode.height)
 
