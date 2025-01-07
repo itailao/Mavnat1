@@ -193,6 +193,10 @@ class AVLTree(object):
 
 	def insert(self,key,value):
 		node = node(key,value)
+		if self.root == None:
+			self.root = node
+			self.max_node = node
+			return node, 1, 0
 		tup = self.help_search(self.root,node)
 		virt = tup[0]
 		e = tup[1]
@@ -281,7 +285,30 @@ class AVLTree(object):
 	dictionary larger than node.key.
 	"""
 	def split(self, node):
-		return None, None
+		t1 = AVLTree()
+		t2 = AVLTree()
+		if x.left.is_real_node():
+			t1.root = x.left
+			x.left.parent = None
+		if x.right.is_real_node():
+			t2.root = x.right
+			x.right.parent = None
+		while x.parent!=None:
+			if x.parent.key<x.key:
+				x.parent.left.parent = None
+				tmp = AVLTree()
+				tmp.root = x.parent.left
+				tmp.insert(x.key, x.value)
+				t1.join(tmp)
+			else:
+				x.parent.right.parent = None
+				tmp = AVLTree()
+				tmp.root = x.parent.right
+				tmp.insert(x.parent.key, x.parent.value)
+				t2.join(tmp)
+		return(t1, t2)
+
+		
 
 	
 	"""returns an array representing dictionary 
