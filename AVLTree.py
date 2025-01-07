@@ -31,25 +31,25 @@ class AVLNode(object):
 	@returns: False if self is a virtual node, True otherwise.
 	"""
 	def is_real_node(self):
-		if self.key == None:
-			return False
-		return True
+		return self.key is not None
+"connects between self/parent and kid accourding to key"
 
-	def connect(self, kid): "connects between self/parent and kid accourding to key
-                kid.parent = self
-                if self.key > kid.key:
-                        self.right = kid
-                else:
-                        self.left = kid
+def connect (self,kid):
+	kid.parent = self
+	if self.key < kid.key:
+		self.right = kid
+	else:
+		self.left = kid 
+	
                         
-	def brother(self):
-		parent = self.parent
-		if self.parent == None:
-			return None
-		if self.key < parent.key:
-			return parent.right
-		else:
-			return parent.left
+def brother(self):
+	parent = self.parent
+	if self.parent == None:
+		return None
+	if self.key < parent.key:
+		return parent.right
+	else:
+		return parent.left
 	
 """
 A class implementing an AVL tree.
@@ -63,7 +63,6 @@ class AVLTree(object):
 		self.root = None
 		self.max_node = None
 		self.size = 0 
-	
 	@staticmethod
 	def help_search(node,key):
 		i = 1
@@ -74,7 +73,6 @@ class AVLTree(object):
 				node = node.right
 			i += 1
 		return node,i
-	
 	@staticmethod
 	def rotation(node,isright):
 		kid = node
@@ -84,7 +82,6 @@ class AVLTree(object):
 			hasGrandpa = False
 		if (isright):
 			tmp = kid.right
-<<<<<<< HEAD
 			kid.right = father
 			father.left = tmp
 			tmp.parent = father
@@ -100,22 +97,6 @@ class AVLTree(object):
 			father.parent.right = kid
 			kid.parent = father.parent
 		father.parent = kid	
-=======
-			if grandpa != None:
-				rightK = False
-				grandpa.connect(kid)
-			kid.connect(father)
-			father.connect(tmp)
-		else:
-			tmp = kid.left
-			if grandpa != None:
-				rightK = False
-				if grandpa.right == father:
-					rightK = True
-				grandpa.connect(kid)
-			kid.connect(father)
-			father.connect(tmp)
->>>>>>> 480952d (changed connect to single arr function and fixed join and rotation)
 		return kid
 
 	#starts from kid of suspicious arch,verify insert, returns promCount
@@ -185,7 +166,7 @@ class AVLTree(object):
 		node = self.max_node
 		i = 1
 		while (node.key >= key and node.parent.key >= key):
-			if(node.key = key):
+			if(node.key == key):
 				return node,i
 			node = node.parent
 			i += 1
@@ -223,7 +204,7 @@ class AVLTree(object):
 		return node, newBalance(node)
 
 	def insert(self,key,value):
-		node = node(key,value)
+		node = AVLNode(key,value)
 		tup = self.help_search(self.root,node)
 		virt = tup[0]
 		e = tup[1]
@@ -248,7 +229,7 @@ class AVLTree(object):
 	def finger_insert(self, key, val):
 		insNode = node(key,val)
 		maxNode = self.max_node
-		tup = self.finger_search
+		tup = self.finger_search()
 		parentNode = tup[0]
 		Bool = True
 		if parentNode.key > key:
