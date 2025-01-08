@@ -268,22 +268,22 @@ def join(self, tree2, key, val):
         maxTree = self
     if maxTree.get_root().height < minTree.get_root().height:
         self = minTree
-             c = minTree.get_root()
-                        while c.height > maxTree.get_root().height:
-                                c = c.right
-                        c.parent.connect(glueNode)
-                        glueNode.connect(c)
-                        glueNode.connect(maxTree.get_root())
-                else:
-                        self = maxTree
-                        c = maxTree.get_root()
-                        while c.height > minTree.get_root().height:
-                                c = c.left
-                        c.parent.connect(glueNode)
-                        glueNode.connect(c)
-                        glueNode.connect(minTree.get_root())
-                glueNode.heigth = c.height+1
-                newBalance(glueNode.height)
+        c = minTree.get_root()
+        while c.height > maxTree.get_root().height:
+        	c = c.right
+        c.parent.connect(glueNode)
+        glueNode.connect(c)
+        glueNode.connect(maxTree.get_root())
+    else:
+        self = maxTree
+        c = maxTree.get_root()
+        while c.height > minTree.get_root().height:
+            c = c.left
+        c.parent.connect(glueNode)
+        glueNode.connect(c)
+        glueNode.connect(minTree.get_root())
+    glueNode.heigth = c.height+1
+    newBalance(glueNode.height)
 
 
 	"""splits the dictionary at a given node
