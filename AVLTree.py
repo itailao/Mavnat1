@@ -299,6 +299,7 @@ def join(self, tree2, key, val):
 def split(self, node):
 		t1 = AVLTree()
 		t2 = AVLTree()
+		x = node
 		if x.left.is_real_node():
 			t1.root = x.left
 			x.left.parent = None
