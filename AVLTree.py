@@ -31,15 +31,15 @@ class AVLNode(object):
 	@returns: False if self is a virtual node, True otherwise.
 	"""
 	def is_real_node(self):
-		return self.key is not None 
+		return self.key is not None and self.height != -1
 
 	#connects between self/parent and kid accourding to key
 	def connect(self, kid):
-                kid.parent = self
-                if self.key < kid.key:
-                        self.right = kid
-                else:
-                        self.left = kid
+		kid.parent = self
+		if self.key < kid.key:
+			self.right = kid
+		else:
+			self.left = kid
                         
                         
 """
@@ -68,24 +68,24 @@ class AVLTree(object):
 	
 	@staticmethod
 	def rotation(node,isright):
-		kid = node
 		father = node.parent
 		grandpa = father.parent
 		if (isright):
-			tmp = kid.right
-			kid.connect(father)
-			if tmp:
-				father.connect(tmp)
+			tmp = node.right
+			node.connect(father)
+			father.connect(tmp)
 		else:
-			tmp = kid.left
-			kid.connect(father)
-			if tmp:
-				father.connect(tmp)
+			tmp = node.left
+			node.connect(father)
+			father.connect(tmp)
 		if grandpa:
-			grandpa.connect(kid)
+			grandpa.connect(node)
 		else:
-			kid.parent = None
-		return kid
+			node.parent = None
+		
+		node.height = max(node.left.height, node.right.height)+1
+		father.height = max(father.left.height, father.right.height)+1
+		return node
 
 	#starts from kid of suspicious arch,verify insert, returns promCount
 def newBalance(self, node):
@@ -103,8 +103,8 @@ def newBalance(self, node):
             if not father.parent:
                 break
             father = father.parent
-            left_height = father.left.height if father.left else 0
-            right_height = father.right.height if father.right else 0
+            left_height = father.left.height if father.left else -1
+            right_height = father.right.height if father.right else -1
             if abs(left_height - right_height) <= 1:
                 father.height = max(left_height, right_height) + 1
                 PromCount += 1
@@ -134,7 +134,7 @@ def newBalance(self, node):
 
 	
 			
-	"""searches for a node in the dictionary corresponding to the key (starting at the root)
+"""searches for a node in the dictionary corresponding to the key (starting at the root)
         
 	@type key: int
 	@param key: a key to be searched
@@ -186,26 +186,35 @@ def help_insert(key, val, virt):
 	virt.height = 0
 	rightVirt = AVLNode(None,None)
 	leftVirt = AVLNode(None,None)
-	virt.right = rightVirt
+	rightVirt.parent = virt
+	leftVirt.parent = virt
 	virt.left = leftVirt
+	virt.right = rightVirt
 	virt.key = key
 	virt.val = val
 	return virt
 
 def insert(self,key,value):
-	node = node(key,value)
+	node = AVLNode(key,value)
 	if self.root == None:
 		self.root = node
 		self.max_node = node
+		node.height = 0
+		node.left = AVLNode(None, None)
+		node.right = AVLNode(None, None)
+		node.left.parent = node
+		node.right.parent = node
+		self.size = 1
 		return node, 1, 0
-	tup = self.help_search(self.root,node)
+	tup = self.help_search(self.root,key)
 	virt = tup[0]
 	e = tup[1]
 	retNode = self.help_insert(key, value ,virt)
 	self.size+=1
-	if value> self.max_node.value:
-		self.max_node = virt
-	Prom = newBalance(retNode)
+	if key> self.max_node.key:
+		self.max_node = retNode
+	virt.parent.connect(retNode)
+	Prom = self.newBalance(retNode)
 	return retNode,e,Prom
 
 
@@ -229,7 +238,7 @@ def finger_insert(self, key, val):
 	self.size+=1
 	if val > self.max_node.value:
 		self.max_value = val
-	Prom = newBalance(retNode)
+	Prom = self.newBalance(retNode)
 	return retNode,tup[1],Prom
 
 
@@ -243,11 +252,68 @@ def finger_insert(self, key, val):
 	@pre: node is a real pointer to a node in self
 	"""
 
-	def delete(self, node):
-		return	
+def delete(self, node):
+    if not node.is_real_node():
+        return None
+
+    if node.left.is_real_node() and node.right.is_real_node():
+        kid = node.right
+        while kid.left and kid.left.is_real_node():
+            kid = kid.left
+        node.key, node.value = kid.key, kid.value
+        self.delete(kid)
+        return
+
+    if node.left.is_real_node():
+        kid = node.left
+    else:
+        kid = node.right
+
+    if node.parent:
+        if node == node.parent.left:
+            node.parent.left = kid
+        else:
+            node.parent.right = kid
+        if kid:
+            kid.parent = node.parent
+    else:
+        self.root = kid
+        if kid:
+            kid.parent = None
+
+    if node == self.max_node:
+        self.max_node = self.root
+        if self.max_node:
+            while self.max_node.right and self.max_node.right.is_real_node():
+                self.max_node = self.max_node.right
+
+    self.size -= 1
+
+    current = node.parent
+    while current:
+        current.height = max(
+            current.left.height if current.left else -1,
+            current.right.height if current.right else -1
+        ) + 1
+        balance_factor = (current.left.height if current.left else -1) - \
+                         (current.right.height if current.right else -1)
+
+        if balance_factor > 1:
+            if (current.left.right and current.left.right.height > 
+                (current.left.left.height if current.left.left else -1)):
+                self.rotation(current.left, False)
+            current = self.rotation(current, True)
+
+        elif balance_factor < -1:
+            if (current.right.left and current.right.left.height > 
+                (current.right.right.height if current.right.right else -1)):
+                self.rotation(current.right, True)
+            current = self.rotation(current, False)
+
+        current = current.parent
 
 	
-	"""joins self with item and another AVLTree
+"""joins self with item and another AVLTree
 
 	@type tree2: AVLTree 
 	@param tree2: a dictionary to be joined with self
@@ -260,33 +326,32 @@ def finger_insert(self, key, val):
 	"""
 def join(self, tree2, key, val):
     glueNode = AVLNode(key, val)
-    self.size+=tree2.size+1
-	minTree = self
-	maxTree = tree2
-	if glueNode.key<maxTree.get_root().key:
+    self.size += tree2.size + 1
+    minTree = self
+    maxTree = tree2
+    if glueNode.key < maxTree.get_root().key:
         minTree = tree2
         maxTree = self
     if maxTree.get_root().height < minTree.get_root().height:
-        self = minTree
         c = minTree.get_root()
         while c.height > maxTree.get_root().height:
-        	c = c.right
+            c = c.right
         c.parent.connect(glueNode)
         glueNode.connect(c)
         glueNode.connect(maxTree.get_root())
     else:
-        self = maxTree
         c = maxTree.get_root()
         while c.height > minTree.get_root().height:
             c = c.left
         c.parent.connect(glueNode)
         glueNode.connect(c)
         glueNode.connect(minTree.get_root())
-    glueNode.heigth = c.height+1
-    newBalance(glueNode.height)
 
+    glueNode.height = max(glueNode.left.height if glueNode.left else -1,
+                          glueNode.right.height if glueNode.right else -1) + 1
+    self.newBalance(glueNode)
 
-	"""splits the dictionary at a given node
+"""splits the dictionary at a given node
 
 	@type node: AVLNode
 	@pre: node is in self
@@ -324,7 +389,7 @@ def split(self, node):
 		
 
 	
-	"""returns an array representing dictionary 
+"""returns an array representing dictionary 
 
 	@rtype: list
 	@returns: a sorted list according to key of touples (key, value) representing the data structure
@@ -343,16 +408,16 @@ def avl_to_array(self):
 	@rtype: AVLNode
 	@returns: the maximal node, None if the dictionary is empty
 	"""
-	def max_node(self):
-		return self.max_node
+def max_node(self):
+	return self.max_node
 
 	"""returns the number of items in dictionary 
 
 	@rtype: int
 	@returns: the number of items in dictionary 
 	"""
-	def size(self):
-		return self.SI
+def size(self):
+	return self.size
 
 
 	"""returns the root of the tree representing the dictionary
@@ -360,6 +425,6 @@ def avl_to_array(self):
 	@rtype: AVLNode
 	@returns: the root, None if the dictionary is empty
 	"""
-	def get_root(self):
-		return self.root
+def get_root(self):
+	return self.root
 
